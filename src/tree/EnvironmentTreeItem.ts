@@ -100,6 +100,18 @@ export class EnvironmentTreeItem extends AzureParentTreeItem implements IAzureRe
         const children: AzExtTreeItem[] = [this.actionsTreeItem];
         if (this.inWorkspace) {
             children.push(...this.gitHubConfigGroupTreeItems);
+
+            if (true) {
+                const createSwaConfigTreeItem: GenericTreeItem = new GenericTreeItem(this, {
+                    contextValue: 'CreateSwaConfigFile',
+                    label: localize('createConfigFile', 'Create Configuration File'),
+                    description: localize('', 'setup routes, roles, and more'),
+                    commandId: 'staticWebApps.createSwaConfigFile',
+                    iconPath: new ThemeIcon('add')
+                });
+                createSwaConfigTreeItem.commandArgs = [context, this];
+                children.push(createSwaConfigTreeItem);
+            }
         }
 
         const client: WebSiteManagementClient = await createWebSiteClient(this.root);
