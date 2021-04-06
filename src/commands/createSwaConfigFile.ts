@@ -7,30 +7,17 @@ import { writeFile } from 'fs-extra';
 import { join } from 'path';
 import { EntryInfo, promise } from 'readdirp';
 import { TextDocument, Uri, window, workspace } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
 import { configFileName } from '../constants';
-import { EnvironmentTreeItem } from "../tree/EnvironmentTreeItem";
-import { localize } from '../utils/localize';
-import { getSingleRootFsPath } from "../utils/workspaceUtils";
 
-export async function createSwaConfigFile(_context: IActionContext, _treeItem: EnvironmentTreeItem): Promise<void> {
-    // TODO: get local path from treeItem
-    const localPath: string | undefined = getSingleRootFsPath();
-
-    const swaConfigFilePath: string | undefined = localPath && await getSwaConfigFilePath(localPath);
-    if (swaConfigFilePath) {
-        throw new Error(localize('configFileExists', 'Configuration file "{0}" already exists.', swaConfigFilePath));
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const newConfigFilePath: string = join(localPath!, configFileName);
-    await writeFile(newConfigFilePath, exampleConfigFile);
-    const textDocument: TextDocument = await workspace.openTextDocument(Uri.file(newConfigFilePath));
+export async function createSwaConfigFile(localProjectPath: string): Promise<void> {
+    const configFilePath: string = join(localProjectPath, configFileName);
+    await writeFile(configFilePath, exampleConfigFile);
+    const textDocument: TextDocument = await workspace.openTextDocument(Uri.file(configFilePath));
     await window.showTextDocument(textDocument);
 }
 
-async function getSwaConfigFilePath(localPath: string): Promise<string | undefined> {
-    const entries: EntryInfo[] = await promise(localPath, { fileFilter: configFileName });
+export async function getSwaConfigFilePath(localProjectPath: string): Promise<string | undefined> {
+    const entries: EntryInfo[] = await promise(localProjectPath, { fileFilter: configFileName });
     return entries.length && entries[0].fullPath || undefined;
 }
 

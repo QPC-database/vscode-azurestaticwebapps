@@ -56,7 +56,7 @@ export function registerCommands(): void {
     registerCommand('staticWebApps.showDocumentation', async (_context: IActionContext) => { await openUrl('https://aka.ms/AA92xai'); });
     registerCommand('staticWebApps.showFunctionsDocumentation', async (_context: IActionContext) => { await openUrl('https://aka.ms/AAacf3z'); });
     registerCommand('staticWebApps.openYAMLConfigFile', openYAMLConfigFile);
-    registerCommand('staticWebApps.createSwaConfigFile', createSwaConfigFile);
+    registerCommand('staticWebApps.createSwaConfigFile', async (_context: IActionContext, localProjectPath: string) => await createSwaConfigFile(localProjectPath));
 
     // Suppress "Report an Issue" button for all errors in favor of the command
     registerErrorHandler(c => c.errorHandling.suppressReportIssue = true);

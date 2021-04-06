@@ -8,6 +8,7 @@ import { ProgressLocation, ThemeIcon, window } from "vscode";
 import { AppSettingsTreeItem, AppSettingTreeItem } from "vscode-azureappservice";
 import { AzExtTreeItem, AzureParentTreeItem, GenericTreeItem, IActionContext, TreeItemIconPath } from "vscode-azureextensionui";
 import { AppSettingsClient } from "../commands/appSettings/AppSettingsClient";
+import { getSwaConfigFilePath } from "../commands/createSwaConfigFile";
 import { productionEnvironmentName } from "../constants";
 import { ext } from "../extensionVariables";
 import { createWebSiteClient } from "../utils/azureClients";
@@ -98,19 +99,20 @@ export class EnvironmentTreeItem extends AzureParentTreeItem implements IAzureRe
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         const children: AzExtTreeItem[] = [this.actionsTreeItem];
-        if (this.inWorkspace) {
+        if (this.localProjectPath && this.inWorkspace) {
             children.push(...this.gitHubConfigGroupTreeItems);
 
-            if (true) {
-                const createSwaConfigTreeItem: GenericTreeItem = new GenericTreeItem(this, {
+            const swaConfigFilePath: string | undefined = await getSwaConfigFilePath(this.localProjectPath);
+            if (!swaConfigFilePath) {
+                const createSwaConfigFileTreeItem: GenericTreeItem = new GenericTreeItem(this, {
                     contextValue: 'CreateSwaConfigFile',
                     label: localize('createConfigFile', 'Create Configuration File'),
                     description: localize('', 'setup routes, roles, and more'),
                     commandId: 'staticWebApps.createSwaConfigFile',
                     iconPath: new ThemeIcon('add')
                 });
-                createSwaConfigTreeItem.commandArgs = [context, this];
-                children.push(createSwaConfigTreeItem);
+                createSwaConfigFileTreeItem.commandArgs = [this.localProjectPath];
+                children.push(createSwaConfigFileTreeItem);
             }
         }
 
