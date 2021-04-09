@@ -8,6 +8,7 @@ import { AppSettingsTreeItem, AppSettingTreeItem } from 'vscode-azureappservice'
 import { AzExtParentTreeItem, AzExtTreeItem, AzureTreeItem, IActionContext, registerCommand, registerErrorHandler, registerReportIssueCommand } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 import { openUrl } from '../utils/openUrl';
+import { addRoutes } from './addRoutes';
 import { downloadAppSettings } from './appSettings/downloadAppSettings';
 import { editAppSetting } from './appSettings/editAppSetting';
 import { renameAppSetting } from './appSettings/renameAppSetting';
@@ -55,6 +56,7 @@ export function registerCommands(): void {
     registerCommand('staticWebApps.showDocumentation', async (_context: IActionContext) => { await openUrl('https://aka.ms/AA92xai'); });
     registerCommand('staticWebApps.showFunctionsDocumentation', async (_context: IActionContext) => { await openUrl('https://aka.ms/AAacf3z'); });
     registerCommand('staticWebApps.openYAMLConfigFile', openYAMLConfigFile);
+    registerCommand('staticWebApps.addRoutes', addRoutes);
 
     // Suppress "Report an Issue" button for all errors in favor of the command
     registerErrorHandler(c => c.errorHandling.suppressReportIssue = true);
