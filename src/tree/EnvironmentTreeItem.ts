@@ -9,7 +9,7 @@ import { AppSettingsTreeItem, AppSettingTreeItem } from "vscode-azureappservice"
 import { AzExtTreeItem, AzureParentTreeItem, GenericTreeItem, IActionContext, TreeItemIconPath } from "vscode-azureextensionui";
 import { AppSettingsClient } from "../commands/appSettings/AppSettingsClient";
 import { getSwaConfigFilePath } from "../commands/createSwaConfigFile";
-import { productionEnvironmentName } from "../constants";
+import { enableLocalProjectView, productionEnvironmentName } from "../constants";
 import { ext } from "../extensionVariables";
 import { createWebSiteClient } from "../utils/azureClients";
 import { pollAzureAsyncOperation } from "../utils/azureUtils";
@@ -17,6 +17,7 @@ import { tryGetLocalBranch, tryGetRemote } from "../utils/gitHubUtils";
 import { localize } from "../utils/localize";
 import { nonNullProp } from "../utils/nonNull";
 import { openUrl } from "../utils/openUrl";
+import { getWorkspaceSetting } from "../utils/settingsUtils";
 import { treeUtils } from "../utils/treeUtils";
 import { getSingleRootFsPath } from "../utils/workspaceUtils";
 import { ActionsTreeItem } from "./ActionsTreeItem";
@@ -99,7 +100,7 @@ export class EnvironmentTreeItem extends AzureParentTreeItem implements IAzureRe
 
     public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         const children: AzExtTreeItem[] = [this.actionsTreeItem];
-        if (this.localProjectPath && this.inWorkspace) {
+        if (getWorkspaceSetting(enableLocalProjectView) && this.inWorkspace && this.localProjectPath) {
             children.push(...this.gitHubConfigGroupTreeItems);
 
             const swaConfigFilePath: string | undefined = await getSwaConfigFilePath(this.localProjectPath);
@@ -188,6 +189,8 @@ export class EnvironmentTreeItem extends AzureParentTreeItem implements IAzureRe
         const branch: string | undefined = remote ? await tryGetLocalBranch() : undefined;
         this.inWorkspace = this.parent.repositoryUrl === remote && this.branch === branch;
 
-        this.gitHubConfigGroupTreeItems = await GitHubConfigGroupTreeItem.createGitHubConfigGroupTreeItems(this);
+        this.gitHubConfigGroupTreeItems = getWorkspaceSetting(enableLocalProjectView) ?
+            await GitHubConfigGroupTreeItem.createGitHubConfigGroupTreeItems(this) :
+            [];
     }
 }
