@@ -8,16 +8,11 @@ import * as fse from 'fs-extra';
 import { join } from 'path';
 import { Uri } from "vscode";
 import { parseError } from 'vscode-azureextensionui';
-import { cpUtils, getGitWorkspaceState, GitWorkspaceState, promptForDefaultBranch, verifyGitWorkspaceForCreation } from "../extension.bundle";
-import { cleanTestWorkspace, createTestActionContext, testUserInput, testWorkspacePath } from "./global.test";
+import { getGitWorkspaceState, GitWorkspaceState, promptForDefaultBranch, verifyGitWorkspaceForCreation } from "../extension.bundle";
+import { createTestActionContext, testUserInput, testWorkspacePath } from "./global.test";
 
 suite('Workspace Configurations for SWA Creation', function (this: Mocha.Suite): void {
-    const testCommitMsg: string = 'Test commit';
-    this.timeout(30 * 1000);
-
-    suiteSetup(async () => {
-        await cleanTestWorkspace();
-    });
+    this.timeout(120 * 1000);
 
     test('Empty workspace with no git repository', async () => {
         const context = createTestActionContext();
@@ -37,10 +32,8 @@ suite('Workspace Configurations for SWA Creation', function (this: Mocha.Suite):
         const testFolderUri: Uri = Uri.file(testWorkspacePath);
 
         const gitWorkspaceState: GitWorkspaceState = await getGitWorkspaceState(context, testFolderUri);
-        await cpUtils.executeCommand(undefined, undefined, 'git', 'config', '--global', 'user.name', 'Automated Tester');
-        await cpUtils.executeCommand(undefined, undefined, 'git', 'config', '--global', 'user.email', 'automated@testing.com');
-
-        assert.strictEqual(gitWorkspaceState.repo, null, 'Workspace contained a repository prior to test');
+        assert.strictEqual(gitWorkspaceState.repo, null, `Workspace contained a repository prior to test "${gitWorkspaceState.repo?.rootUri.fsPath}"`);
+        const testCommitMsg: string = 'Test commit';
         await testUserInput.runWithInputs(['Create', testCommitMsg], async () => {
             await verifyGitWorkspaceForCreation(context, gitWorkspaceState, testFolderUri);
             assert.ok(gitWorkspaceState.repo, 'Repo did not successfully initialize')
